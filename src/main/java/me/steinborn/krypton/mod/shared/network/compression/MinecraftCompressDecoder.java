@@ -44,7 +44,6 @@ public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
             return;
         }
 
-        // SECURITY FIX: Always enforce the cap regardless of validate flag
         checkState(claimedUncompressedSize <= UNCOMPRESSED_CAP,
                 "Uncompressed size %s exceeds hard threshold of %s", claimedUncompressedSize,
                 UNCOMPRESSED_CAP);
