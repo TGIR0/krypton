@@ -4,7 +4,7 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class KryptonServerInitializer implements DedicatedServerModInitializer {
+public final class KryptonServerInitializer implements DedicatedServerModInitializer {
     private static final Logger LOGGER = LogManager.getLogger(KryptonServerInitializer.class);
 
     @Override

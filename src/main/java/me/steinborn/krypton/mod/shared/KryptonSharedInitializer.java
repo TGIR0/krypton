@@ -6,7 +6,7 @@ import net.fabricmc.api.ModInitializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class KryptonSharedInitializer implements ModInitializer {
+public final class KryptonSharedInitializer implements ModInitializer {
     private static final Logger LOGGER = LogManager.getLogger(KryptonSharedInitializer.class);
 
     static {

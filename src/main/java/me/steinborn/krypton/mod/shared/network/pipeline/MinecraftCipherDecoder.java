@@ -19,7 +19,7 @@ public class MinecraftCipherDecoder extends MessageToMessageDecoder<ByteBuf> {
 
   @Override
   protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-    ByteBuf compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), cipher, in).slice();
+    ByteBuf compatible = MoreByteBufUtils.ensureCompatible(ctx.alloc(), cipher, in);
     try {
       cipher.process(compatible);
       out.add(compatible);

@@ -3,6 +3,7 @@ package me.steinborn.krypton.mixin.shared.network.pipeline.compression;
 import com.velocitypowered.natives.compression.VelocityCompressor;
 import com.velocitypowered.natives.util.Natives;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import me.steinborn.krypton.mod.shared.misc.KryptonPipelineEvent;
 import me.steinborn.krypton.mod.shared.network.compression.MinecraftCompressDecoder;
 import me.steinborn.krypton.mod.shared.network.compression.MinecraftCompressEncoder;
@@ -29,23 +30,27 @@ public class ConnectionMixin {
             if (isKryptonOrVanillaCompressor(this.channel.pipeline().get("compress"))) {
                 this.channel.pipeline().remove("compress");
             }
-
             this.channel.pipeline().fireUserEventTriggered(KryptonPipelineEvent.COMPRESSION_DISABLED);
         } else {
-            MinecraftCompressDecoder decoder = (MinecraftCompressDecoder) channel.pipeline()
-                    .get("decompress");
-            MinecraftCompressEncoder encoder = (MinecraftCompressEncoder) channel.pipeline()
-                    .get("compress");
-            if (decoder != null && encoder != null) {
-                decoder.setThreshold(compressionThreshold);
-                encoder.setThreshold(compressionThreshold);
+            ChannelHandler existingDecoder = channel.pipeline().get("decompress");
+            ChannelHandler existingEncoder = channel.pipeline().get("compress");
 
+            if (existingDecoder instanceof MinecraftCompressDecoder
+                    && existingEncoder instanceof MinecraftCompressEncoder) {
+                ((MinecraftCompressDecoder) existingDecoder).setThreshold(compressionThreshold);
+                ((MinecraftCompressEncoder) existingEncoder).setThreshold(compressionThreshold);
                 this.channel.pipeline().fireUserEventTriggered(KryptonPipelineEvent.COMPRESSION_THRESHOLD_UPDATED);
             } else {
-                VelocityCompressor compressor = Natives.compress.get().create(4);
+                if (existingDecoder != null) {
+                    channel.pipeline().remove(existingDecoder);
+                }
+                if (existingEncoder != null) {
+                    channel.pipeline().remove(existingEncoder);
+                }
 
-                encoder = new MinecraftCompressEncoder(compressionThreshold, compressor);
-                decoder = new MinecraftCompressDecoder(compressionThreshold, validate, compressor);
+                VelocityCompressor compressor = Natives.compress.get().create(4);
+                MinecraftCompressEncoder encoder = new MinecraftCompressEncoder(compressionThreshold, compressor);
+                MinecraftCompressDecoder decoder = new MinecraftCompressDecoder(compressionThreshold, validate, compressor);
 
                 channel.pipeline().addBefore("decoder", "decompress", decoder);
                 channel.pipeline().addBefore("encoder", "compress", encoder);
@@ -53,7 +58,6 @@ public class ConnectionMixin {
                 this.channel.pipeline().fireUserEventTriggered(KryptonPipelineEvent.COMPRESSION_ENABLED);
             }
         }
-
         ci.cancel();
     }
 

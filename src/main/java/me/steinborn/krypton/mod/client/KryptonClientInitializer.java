@@ -7,7 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class KryptonClientInitializer implements ClientModInitializer {
+public final class KryptonClientInitializer implements ClientModInitializer {
     private static final Logger LOGGER = LogManager.getLogger(KryptonClientInitializer.class);
 
     @Override

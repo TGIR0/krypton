@@ -12,13 +12,10 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.velocitypowered.natives.util.MoreByteBufUtils.ensureCompatible;
 import static com.velocitypowered.natives.util.MoreByteBufUtils.preferredBuffer;
 
-/**
- * Decompresses a Minecraft packet.
- */
 public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
 
-    private static final int VANILLA_MAXIMUM_UNCOMPRESSED_SIZE = 8 * 1024 * 1024; // 8MiB
-    private static final int HARD_MAXIMUM_UNCOMPRESSED_SIZE = 128 * 1024 * 1024; // 128MiB
+    private static final int VANILLA_MAXIMUM_UNCOMPRESSED_SIZE = 8 * 1024 * 1024;
+    private static final int HARD_MAXIMUM_UNCOMPRESSED_SIZE = 128 * 1024 * 1024;
 
     private static final int UNCOMPRESSED_CAP =
             Boolean.getBoolean("krypton.permit-oversized-packets")
@@ -38,6 +35,7 @@ public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         FriendlyByteBuf bb = new FriendlyByteBuf(in);
         int claimedUncompressedSize = bb.readVarInt();
+
         if (claimedUncompressedSize == 0) {
             int actualUncompressedSize = in.readableBytes();
             checkState(actualUncompressedSize < threshold, "Actual uncompressed size %s is greater than"
@@ -46,12 +44,14 @@ public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
             return;
         }
 
+        // SECURITY FIX: Always enforce the cap regardless of validate flag
+        checkState(claimedUncompressedSize <= UNCOMPRESSED_CAP,
+                "Uncompressed size %s exceeds hard threshold of %s", claimedUncompressedSize,
+                UNCOMPRESSED_CAP);
+
         if (validate) {
             checkState(claimedUncompressedSize >= threshold, "Uncompressed size %s is less than"
                     + " threshold %s", claimedUncompressedSize, threshold);
-            checkState(claimedUncompressedSize <= UNCOMPRESSED_CAP,
-                    "Uncompressed size %s exceeds hard threshold of %s", claimedUncompressedSize,
-                    UNCOMPRESSED_CAP);
         }
 
         ByteBuf compatibleIn = ensureCompatible(ctx.alloc(), compressor, in);
