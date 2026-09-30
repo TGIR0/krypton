@@ -1,27 +1,91 @@
-![Krypton logo](https://user-images.githubusercontent.com/16436212/102424564-692de280-3fd9-11eb-98a2-ac125cb8e507.png)
+# Krypton (TGIR0 fork)
 
-# Krypton
-![Mod loader: Fabric](https://img.shields.io/badge/modloader-Fabric-1976d2?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAFHGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDIgNzkuMTYwOTI0LCAyMDE3LzA3LzEzLTAxOjA2OjM5ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDE4LTEyLTE2VDE2OjU0OjE3LTA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAxOS0wNy0yOFQyMToxNzo0OC0wNzowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAxOS0wNy0yOFQyMToxNzo0OC0wNzowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowZWRiMWMyYy1mZjhjLWU0NDEtOTMxZi00OTVkNGYxNGM3NjAiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MGVkYjFjMmMtZmY4Yy1lNDQxLTkzMWYtNDk1ZDRmMTRjNzYwIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MGVkYjFjMmMtZmY4Yy1lNDQxLTkzMWYtNDk1ZDRmMTRjNzYwIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDowZWRiMWMyYy1mZjhjLWU0NDEtOTMxZi00OTVkNGYxNGM3NjAiIHN0RXZ0OndoZW49IjIwMTgtMTItMTZUMTY6NTQ6MTctMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE4IChXaW5kb3dzKSIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4/HiGMAAAAtUlEQVRYw+XXrQqAMBQF4D2P2eBL+QIG8RnEJFaNBjEum+0+zMQLtwwv+wV3ZzhhMDgfJ0wUSinxZUQWgKos1JP/AbD4OneIDyQPwCFniA+EJ4CaXm4TxAXCC0BNHgLhAdAnx9hC8PwGSRtAFVMQjF7cNTWED8B1cgwW20yfJgAvrssAsZ1cB3g/xckAxr6FmCDU5N6f488BrpCQ4rQBJkiMYh4ACmLzwOQF0CExinkCsvw7vgGikl+OotaKRwAAAABJRU5ErkJggg==) ![all](https://img.shields.io/badge/environment-any-4caf50?style=flat-square)
+A [Fabric](https://fabricmc.net/) mod that optimizes the Minecraft networking stack and the entity tracker.
+It works on both the client and the dedicated server.
 
-Krypton is a Fabric mod that attempts to optimize the Minecraft networking stack. It derives from work
-done in the [Velocity](https://velocitypowered.com/) and [Paper](https://papermc.io) projects.
+This repository is a fork of [astei/krypton](https://github.com/astei/krypton) with extra hardening,
+small cleanups, and unit tests. Most of the credit for the mod itself goes to the original author
+(see [Credits](#credits)).
 
-Krypton derives itself from Ancient Greek _kryptos_, which means "the hidden one". This makes
-it evident most of the benefit from Krypton is "hidden" but is noticeable by a server administrator.
+> **Status:** early-stage and experimental. There are no published releases yet, and no guarantees about
+> stability or compatibility with other mods. Please test on a non-production world or server first.
 
-[The wiki contains important information &ndash; read it](https://github.com/astei/krypton/wiki).
-[Join my Discord](https://discord.gg/RUGArxEQ8J) to discuss the mod or get support if the wiki didn't
-answer your question.
+## Requirements
 
-## Compiling / Releases
+| Item | Version |
+|------|---------|
+| Minecraft | 26.2 or newer |
+| Fabric Loader | 0.18.4 or newer |
+| JDK (only for building) | 25 |
 
-**CAUTION!** I do not provide any guarantees about Krypton's stability, compatibility with other mods,
-             ability to be used on every server, or support for every possible setup out there. Support
-             for this mod is provided on a "best-effort" basis. This is not my day job, it is a hobby
-             growing out of related work I've done. **You have been warned.**
+## Installation
 
-Releases I deem reasonably stable can be found on [GitHub](https://github.com/astei/krypton/releases),
-[CurseForge](https://www.curseforge.com/minecraft/mc-mods/krypton), and on [Modrinth](https://modrinth.com/mod/krypton).
-Development builds may be downloaded from my [Jenkins server](https://ci.velocitypowered.com/job/krypton/).
+There are no prebuilt releases yet, so you need to build the mod from source (see below).
+After building:
 
-You can also compile the mod from source in the usual fashion.
+1. Install Fabric Loader for your Minecraft version.
+2. Copy the built `.jar` file into your `mods` folder (client or server).
+3. Start the game or server.
+
+## Building from source
+
+You need JDK 25 and Git.
+
+```bash
+git clone https://github.com/TGIR0/krypton.git
+cd krypton
+
+# Linux / macOS
+./gradlew build
+
+# Windows
+gradlew.bat build
+```
+
+The built jar will be in `build/libs/`. Use the file without the `-sources` suffix.
+
+To run the unit tests only:
+
+```bash
+./gradlew test
+```
+
+## What is different from upstream
+
+- **Decompression size limit is always enforced.** The claimed uncompressed size of a packet is now checked
+  against the limit even when packet validation is turned off. This protects against "zip bomb" packets that
+  claim a huge size with tiny data.
+- **Safer compression handler setup.** When the compression threshold changes, the mod now checks the real
+  type of the existing pipeline handlers (instead of casting blindly) and replaces them if they are not
+  Krypton's own.
+- **Faster VarInt length calculation.** The lookup table was replaced with a small arithmetic formula. It was
+  compared against the vanilla calculation on boundary values, negative numbers, and random inputs.
+- **Unit tests.** Added tests for the decompression limit and extra VarInt edge cases (JUnit and Mockito).
+- **Housekeeping.** Updated the Gradle wrapper to 9.7.0, made utility classes `final` with private
+  constructors, and minor formatting cleanup.
+
+## Advanced options
+
+| System property | Effect |
+|-----------------|--------|
+| `-Dkrypton.permit-oversized-packets=true` | Raises the maximum allowed uncompressed packet size from 8 MiB to 128 MiB. Leave this off unless you know you need it. |
+
+## Reporting problems
+
+Please open an issue at <https://github.com/TGIR0/krypton/issues> and include:
+
+- Minecraft, Fabric Loader, and Krypton versions
+- Whether it happened on a client or a server
+- The crash report or `latest.log`
+- The list of other mods you use
+
+## Credits
+
+- **[Krypton](https://github.com/astei/krypton)** by Andrew Steinborn (astei) and contributors, the original
+  project this fork is based on. It draws on networking work from
+  [Velocity](https://velocitypowered.com/) and [Paper](https://papermc.io).
+- Native compression and encryption support comes from Velocity's `velocity-native` library.
+
+## License
+
+Licensed under the [GNU Lesser General Public License v3.0](LICENSE), the same license as the upstream project.
