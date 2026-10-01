@@ -5,11 +5,16 @@
   "name": "Krypton",
   "description": "A Fabric mod that optimizes the Minecraft networking stack and entity tracker.",
   "authors": [
+    "astei",
     "tuxed"
   ],
+  "contributors": [
+    "TGIR0"
+  ],
   "contact": {
-    "website": "https://github.com/astei/krypton",
-    "repo": "https://github.com/astei/krypton"
+    "homepage": "https://github.com/TGIR0/krypton",
+    "sources": "https://github.com/TGIR0/krypton",
+    "issues": "https://github.com/TGIR0/krypton/issues"
   },
   "license": "LGPL-3.0",
   "icon": "assets/krypton/icon.png",
@@ -31,6 +36,6 @@
   "accessWidener": "krypton.accesswidener",
   "depends": {
     "fabricloader": ">=0.18.4",
-    "minecraft": ">=26.2"
+    "minecraft": "~26.3"
   }
 }
