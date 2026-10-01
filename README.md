@@ -14,7 +14,7 @@ small cleanups, and unit tests. Most of the credit for the mod itself goes to th
 
 | Item | Version |
 |------|---------|
-| Minecraft | 26.2 or newer |
+| Minecraft | 26.3 or newer |
 | Fabric Loader | 0.18.4 or newer |
 | JDK (only for building) | 25 |
 
