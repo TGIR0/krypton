@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.Set;
 
 public final class KryptonMixinPlugin implements IMixinConfigPlugin {
-    private static final String E4MC_MOD_ID = "e4mc";
+    private static final boolean E4MC_LOADED = FabricLoader.getInstance().isModLoaded("e4mc");
     private static final String E4MC_CONFLICTING_MIXIN =
             "me.steinborn.krypton.mixin.shared.network.pipeline.encryption.ServerLoginPacketListenerImplMixin";
-    private static final boolean E4MC_LOADED = FabricLoader.getInstance().isModLoaded(E4MC_MOD_ID);
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -25,8 +24,9 @@ public final class KryptonMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        // e4mc 6.x and newer installs its own encryption redirect for the same
-        // login setup path. Applying both redirects can produce a Mixin conflict.
+        // e4mc and Krypton both redirect the same encryption setup path.
+        // Disable Krypton's redirect when e4mc is installed to avoid a
+        // @Redirect conflict while leaving the rest of Krypton enabled.
         if (E4MC_LOADED && E4MC_CONFLICTING_MIXIN.equals(mixinClassName)) {
             return false;
         }
