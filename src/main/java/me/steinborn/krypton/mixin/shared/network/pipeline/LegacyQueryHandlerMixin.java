@@ -9,9 +9,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Mixes into {@link LegacyQueryHandler} to avoid processing messages after the
- * channel has already become inactive and to release reference-counted data
- * correctly when cancelling the read.
+ * Mixes into {@link LegacyQueryHandler} to fix a security issue and release
+ * inbound reference-counted messages when the read is cancelled.
  */
 @Mixin(LegacyQueryHandler.class)
 public abstract class LegacyQueryHandlerMixin {
