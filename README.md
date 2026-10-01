@@ -61,7 +61,7 @@ To run the unit tests only:
 - **Faster VarInt length calculation.** The lookup table was replaced with a small arithmetic formula. It was
   compared against the vanilla calculation on boundary values, negative numbers, and random inputs.
 - **Unit tests.** Added tests for the decompression limit and extra VarInt edge cases (JUnit and Mockito).
-- **Housekeeping.** Updated the Gradle wrapper to 9.7.0, made utility classes `final` with private
+- **Housekeeping.** Updated the Gradle wrapper to 9.7.1, made utility classes `final` with private
   constructors, and minor formatting cleanup.
 
 ## Advanced options
