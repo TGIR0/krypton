@@ -4,6 +4,7 @@ import com.velocitypowered.natives.compression.VelocityCompressor;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
+import me.steinborn.krypton.mod.shared.network.util.DecompressionRateLimiter;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.List;
@@ -16,7 +17,6 @@ public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
 
     private static final int VANILLA_MAXIMUM_UNCOMPRESSED_SIZE = 8 * 1024 * 1024;
     private static final int HARD_MAXIMUM_UNCOMPRESSED_SIZE = 128 * 1024 * 1024;
-
     private static final int UNCOMPRESSED_CAP =
             Boolean.getBoolean("krypton.permit-oversized-packets")
                     ? HARD_MAXIMUM_UNCOMPRESSED_SIZE : VANILLA_MAXIMUM_UNCOMPRESSED_SIZE;
@@ -24,11 +24,13 @@ public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
     private int threshold;
     private final VelocityCompressor compressor;
     private final boolean validate;
+    private final DecompressionRateLimiter rateLimiter;
 
     public MinecraftCompressDecoder(int threshold, boolean validate, VelocityCompressor compressor) {
         this.threshold = threshold;
         this.compressor = compressor;
         this.validate = validate;
+        this.rateLimiter = new DecompressionRateLimiter();
     }
 
     @Override
@@ -44,6 +46,8 @@ public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
             return;
         }
 
+        checkState(claimedUncompressedSize >= 0,
+                "Uncompressed size %s must not be negative", claimedUncompressedSize);
         checkState(claimedUncompressedSize <= UNCOMPRESSED_CAP,
                 "Uncompressed size %s exceeds hard threshold of %s", claimedUncompressedSize,
                 UNCOMPRESSED_CAP);
@@ -52,6 +56,11 @@ public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
             checkState(claimedUncompressedSize >= threshold, "Uncompressed size %s is less than"
                     + " threshold %s", claimedUncompressedSize, threshold);
         }
+
+        // Reserve the destination size before asking the native compressor for
+        // a buffer. This prevents an attacker from repeatedly forcing large
+        // allocations within the same connection.
+        rateLimiter.consume(claimedUncompressedSize);
 
         ByteBuf compatibleIn = ensureCompatible(ctx.alloc(), compressor, in);
         ByteBuf uncompressed = preferredBuffer(ctx.alloc(), compressor, claimedUncompressedSize);
