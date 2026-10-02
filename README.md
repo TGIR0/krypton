@@ -14,7 +14,7 @@ small cleanups, and unit tests. Most of the credit for the mod itself goes to th
 
 | Item | Version |
 |------|---------|
-| Minecraft | 26.3 or newer |
+| Minecraft | 26.3.x |
 | Fabric Loader | 0.18.4 or newer |
 | JDK (only for building) | 25 |
 
@@ -50,16 +50,16 @@ To run the unit tests only:
 ./gradlew test
 ```
 
+Every push is also built and tested automatically by GitHub Actions (see `.github/workflows/build.yml`).
+
 ## What is different from upstream
 
 - **Decompression size limit is always enforced.** The claimed uncompressed size is checked against the active hard cap even when packet validation is disabled.
-- **Per-connection decompression rate limiting.** Large decompression requests are budgeted over a one-second window so a peer cannot repeatedly force large destination-buffer allocations without hitting a limit.
 - **Negative claimed sizes are rejected.** Malformed compression metadata cannot reach the native allocator.
-- **Safer compression handler setup.** Krypton updates or replaces vanilla/Krypton compression handlers but preserves unknown third-party handlers instead of removing them.
-- **e4mc compatibility.** The conflicting Krypton login encryption mixin is skipped automatically when e4mc is loaded.
-- **Faster VarInt length calculation.** The lookup table was replaced with a small arithmetic formula and covered by boundary/negative-value tests.
+- **Safer compression handler setup.** When compression is turned off, only vanilla or Krypton compression handlers are removed. When it is turned on, Krypton reuses its own handlers if they already exist (only updating the threshold) and otherwise replaces whatever is in the `compress` and `decompress` slots.
+- **e4mc compatibility.** The Krypton login encryption mixin is skipped automatically when e4mc is loaded, to avoid a mixin conflict. In that case the game's normal (vanilla) encryption is used instead of Krypton's native encryption.
 - **Correct reference-count cleanup.** The inactive legacy query path releases reference-counted messages before cancelling the pipeline read.
-- **Unit tests.** Added tests for decompression budgeting and VarInt edge cases.
+- **Unit tests.** A test suite built on Netty's `EmbeddedChannel` covers the compression and encryption handlers: oversized, negative and corrupt packets, exact threshold and size-cap boundaries, full compress/decompress round trips, fragmented encrypted streams, and buffer leak checks (Netty's paranoid leak detector is enabled while tests run). VarInt length calculation is checked against the vanilla result for all 2^32 integers.
 - **Housekeeping.** Utility classes are `final` with private constructors and the Gradle wrapper is kept current with the fork.
 
 ## Advanced options
@@ -67,13 +67,10 @@ To run the unit tests only:
 | System property | Effect |
 |-----------------|--------|
 | `-Dkrypton.permit-oversized-packets=true` | Raises the maximum allowed uncompressed packet size from 8 MiB to 128 MiB. Leave this off unless you know you need it. |
-| `-Dkrypton.max-decompressed-bytes-per-second=<bytes>` | Changes the per-connection decompression budget. The default is 128 MiB/s. Values `<= 0` or invalid values fall back to the default. |
-
-The rate limiter is independent of the per-packet cap: one packet may consume up to the configured packet cap, but repeated large packets are bounded by the per-connection budget.
 
 ## Compatibility note
 
-Krypton modifies the Netty pipeline through Mixins. Modpacks containing other networking or transport mods should be tested as a complete set. When Krypton sees a foreign handler occupying a compression slot, it leaves that handler in place rather than removing it.
+Krypton modifies the Netty pipeline through Mixins. Modpacks containing other networking or transport mods should be tested as a complete set.
 
 ## Reporting problems
 
@@ -83,7 +80,7 @@ Please open an issue at <https://github.com/TGIR0/krypton/issues> and include:
 - Whether it happened on a client or a server
 - The crash report or `latest.log`
 - The list of other mods you use
-- Relevant JVM system properties, especially compression-related ones
+- Any JVM system properties you set for Krypton
 
 ## Credits
 
