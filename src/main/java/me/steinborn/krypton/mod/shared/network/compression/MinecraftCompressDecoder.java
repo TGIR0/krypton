@@ -12,10 +12,19 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.velocitypowered.natives.util.MoreByteBufUtils.ensureCompatible;
 import static com.velocitypowered.natives.util.MoreByteBufUtils.preferredBuffer;
 
+/**
+ * Decompresses a Minecraft packet.
+ * <p>
+ * Every packet starts with a VarInt holding the <em>claimed</em> uncompressed size, where 0 means
+ * "this packet was not compressed". That number comes from the other side of the connection, so it
+ * is untrusted: it is checked before it is used to allocate a buffer.
+ */
 public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
 
-    private static final int VANILLA_MAXIMUM_UNCOMPRESSED_SIZE = 8 * 1024 * 1024;
-    private static final int HARD_MAXIMUM_UNCOMPRESSED_SIZE = 128 * 1024 * 1024;
+    private static final int VANILLA_MAXIMUM_UNCOMPRESSED_SIZE = 8 * 1024 * 1024; // 8 MiB
+    private static final int HARD_MAXIMUM_UNCOMPRESSED_SIZE = 128 * 1024 * 1024; // 128 MiB
+
+    /** Largest uncompressed packet we accept (8 MiB, or 128 MiB with -Dkrypton.permit-oversized-packets=true). */
     private static final int UNCOMPRESSED_CAP =
             Boolean.getBoolean("krypton.permit-oversized-packets")
                     ? HARD_MAXIMUM_UNCOMPRESSED_SIZE : VANILLA_MAXIMUM_UNCOMPRESSED_SIZE;
@@ -43,9 +52,9 @@ public class MinecraftCompressDecoder extends MessageToMessageDecoder<ByteBuf> {
             return;
         }
 
-        // A negative claimed size is invalid. Keep this check independent of
-        // protocol-threshold validation so malformed packets cannot bypass the
-        // size checks when validation is disabled.
+        // These two size checks run even when `validate` is false. `validate` only controls the
+        // protocol rule about the threshold; without these checks a malicious peer could claim a
+        // huge (or negative) size and make us allocate a giant buffer for a tiny packet.
         checkState(claimedUncompressedSize >= 0,
                 "Uncompressed size %s must not be negative", claimedUncompressedSize);
         checkState(claimedUncompressedSize <= UNCOMPRESSED_CAP,
