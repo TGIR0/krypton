@@ -9,6 +9,14 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 
 import java.util.List;
 
+/**
+ * Decrypts incoming bytes in place.
+ * <p>
+ * {@link MoreByteBufUtils#ensureCompatible} returns either the same buffer with its reference count
+ * raised by one, or a fresh copy. In both cases the buffer passed on to the next handler carries
+ * exactly one reference, and {@link MessageToMessageDecoder} releases the original input itself,
+ * so nothing here needs to be sliced or released again (except when decryption fails).
+ */
 public class MinecraftCipherDecoder extends MessageToMessageDecoder<ByteBuf> {
 
   private final VelocityCipher cipher;
