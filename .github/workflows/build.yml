@@ -4,42 +4,52 @@ on:
   push:
     branches: [ master, cleanup ]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# A newer push cancels the older run for the same branch, so the queue never fills with stale builds.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 25
 
-      # Also validates the Gradle wrapper jar against Gradle's official checksums.
+      # Caches Gradle, and validates the Gradle wrapper jar against Gradle's official checksums.
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Make gradlew executable
         run: chmod +x gradlew
 
+      # --warning-mode all prints every Gradle deprecation, so problems are fixed before Gradle 10.
       - name: Build and test
-        run: ./gradlew build --stacktrace
+        run: ./gradlew build --stacktrace --warning-mode all
 
       - name: Upload the built mod
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: krypton-jar
           path: build/libs/*.jar
+          if-no-files-found: error
 
       - name: Upload test reports (on failure)
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports
           path: build/reports/tests/
+          if-no-files-found: ignore
