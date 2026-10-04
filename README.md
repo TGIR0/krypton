@@ -1,8 +1,7 @@
 # Krypton (TGIR0 fork)
 
 A [Fabric](https://fabricmc.net/) mod that optimizes the Minecraft networking stack and the entity tracker.
-It works on both the client and the dedicated server.
-
+It works on both the client and the dedicated servethe
 This repository is a fork of [astei/krypton](https://github.com/astei/krypton) with extra hardening,
 small cleanups, and unit tests. Most of the credit for the mod itself goes to the original author
 (see [Credits](#credits)).
@@ -59,6 +58,9 @@ Every push is also built and tested automatically by GitHub Actions (see `.githu
 - **Safer compression handler setup.** When compression is turned off, only vanilla or Krypton compression handlers are removed. When it is turned on, Krypton reuses its own handlers if they already exist (only updating the threshold) and otherwise replaces whatever is in the `compress` and `decompress` slots.
 - **e4mc compatibility.** The Krypton login encryption mixin is skipped automatically when e4mc is loaded, to avoid a mixin conflict. In that case the game's normal (vanilla) encryption is used instead of Krypton's native encryption.
 - **Correct reference-count cleanup.** The inactive legacy query path releases reference-counted messages before cancelling the pipeline read.
+- **Low-latency sockets.** `TCP_NODELAY` is enforced on every TCP connection (normally already on; this is a safety net), avoiding stalls of roughly 40 ms caused by Nagle's algorithm.
+- **Frame size check.** Packets too large for the protocol's 3-byte length prefix now fail on the sending side with a clear error.
+- **Tunable compression level.** See `krypton.compression-level` below.
 - **Unit tests.** A test suite built on Netty's `EmbeddedChannel` covers the compression and encryption handlers: oversized, negative and corrupt packets, exact threshold and size-cap boundaries, full compress/decompress round trips, fragmented encrypted streams, and buffer leak checks (Netty's paranoid leak detector is enabled while tests run). VarInt length calculation is checked against the vanilla result for all 2^32 integers.
 - **Housekeeping.** Utility classes are `final` with private constructors and the Gradle wrapper is kept current with the fork.
 
@@ -67,6 +69,11 @@ Every push is also built and tested automatically by GitHub Actions (see `.githu
 | System property | Effect |
 |-----------------|--------|
 | `-Dkrypton.permit-oversized-packets=true` | Raises the maximum allowed uncompressed packet size from 8 MiB to 128 MiB. Leave this off unless you know you need it. |
+| `-Dkrypton.compression-level=<1-9>` | Sets the zlib compression level for packets this side sends (default 4). Lower is faster and sends more bytes; higher sends fewer bytes and uses more CPU. Invalid values fall back to 4. |
+
+## More tuning
+
+See [docs/NETWORK_TUNING.md](docs/NETWORK_TUNING.md) for measured latency results and recommended server, JVM, Linux and IPv6 settings.
 
 ## Compatibility note
 
