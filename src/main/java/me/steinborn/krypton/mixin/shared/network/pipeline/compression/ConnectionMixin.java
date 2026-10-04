@@ -7,6 +7,8 @@ import io.netty.channel.ChannelHandler;
 import me.steinborn.krypton.mod.shared.misc.KryptonPipelineEvent;
 import me.steinborn.krypton.mod.shared.network.compression.MinecraftCompressDecoder;
 import me.steinborn.krypton.mod.shared.network.compression.MinecraftCompressEncoder;
+import me.steinborn.krypton.mod.shared.network.util.CompressionLevel;
+import me.steinborn.krypton.mod.shared.network.util.SocketTuning;
 import net.minecraft.network.CompressionDecoder;
 import net.minecraft.network.CompressionEncoder;
 import net.minecraft.network.Connection;
@@ -23,6 +25,7 @@ public class ConnectionMixin {
 
     @Inject(method = "setupCompression", at = @At("HEAD"), cancellable = true)
     public void setupCompression(int compressionThreshold, boolean validate, CallbackInfo ci) {
+        SocketTuning.applyLowLatency(this.channel);
         if (compressionThreshold < 0) {
             if (isKryptonOrVanillaDecompressor(this.channel.pipeline().get("decompress"))) {
                 this.channel.pipeline().remove("decompress");
@@ -46,7 +49,7 @@ public class ConnectionMixin {
                 if (existingEncoder != null) {
                     channel.pipeline().remove(existingEncoder);
                 }
-                VelocityCompressor compressor = Natives.compress.get().create(4);
+                VelocityCompressor compressor = Natives.compress.get().create(CompressionLevel.get());
                 MinecraftCompressEncoder encoder = new MinecraftCompressEncoder(compressionThreshold, compressor);
                 MinecraftCompressDecoder decoder = new MinecraftCompressDecoder(compressionThreshold, validate, compressor);
 
