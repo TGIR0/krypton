@@ -1,0 +1,13 @@
+# Opens a pull request whenever a newer version of a dependency or GitHub Action exists,
+# so the project always moves to the latest versions instead of silently ageing.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
