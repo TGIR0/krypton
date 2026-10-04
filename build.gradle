@@ -5,7 +5,7 @@ plugins {
 
 repositories {
     maven {
-        url "https://repo.papermc.io/repository/maven-public/"
+        url = "https://repo.papermc.io/repository/maven-public/"
     }
 }
 
@@ -33,7 +33,7 @@ test {
     // Show why a test failed directly in the build log (useful in GitHub Actions).
     testLogging {
         events 'failed', 'skipped'
-        exceptionFormat 'full'
+        exceptionFormat = 'full'
     }
 
     // Make Netty report any leaked reference-counted buffer while tests run.
