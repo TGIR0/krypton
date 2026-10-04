@@ -1,5 +1,5 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.17.21'
     id 'maven-publish'
 }
 
@@ -16,14 +16,11 @@ base {
     archivesName = project.archives_base_name
 }
 
-configurations {
-    shade.transitive = false
-}
-
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:6.1.3'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:6.1.3'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.1.3'
+    // The JUnit BOM keeps every JUnit artifact on the same version.
+    testImplementation platform('org.junit:junit-bom:6.1.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -51,11 +48,16 @@ processResources {
     }
 }
 
-// ensure that the encoding is set to UTF-8, no matter what the system default is
-// this fixes some edge cases with special characters not displaying correctly
-// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
+tasks.withType(JavaCompile).configureEach {
+    // UTF-8 regardless of the system default, and compile against the Java 25 API.
+    options.encoding = 'UTF-8'
+    options.release = 25
+}
+
+// Identical inputs produce an identical jar (same file order, no timestamps).
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
 }
 
 java {
@@ -63,9 +65,6 @@ java {
     // if it is present.
     // If you remove this line, sources will not be generated.
     withSourcesJar()
-
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {
@@ -81,25 +80,6 @@ publishing {
     }
 }
 
-/*afterEvaluate {
-    tasks.getByName("configureClientLaunch").doFirst {
-        loom {
-            runs {
-                all {
-                    property("fabric.development=true")
-                    property("mixin.hotSwap")
-                    // vmArg("-javaagent:${dependencies.module(group = "net.fabricmc", name = "sponge-mixin")}")
-                    def mixinJarFile = configurations.compileClasspath.files {
-                        it.group == "net.fabricmc" && it.name == "sponge-mixin"
-                    }.find { true }
-                    vmArg("-javaagent:$mixinJarFile")
-
-                    ideConfigGenerated = true
-                }
-            }
-        }
-    }
-}*/
 
 loom {
     accessWidenerPath = file("src/main/resources/krypton.accesswidener")
