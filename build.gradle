@@ -41,10 +41,13 @@ test {
 }
 
 processResources {
-    inputs.property "version", project.version
+    // Read the version now, while Gradle configures the build. The closure below runs later, and
+    // touching `project` inside it is not allowed with the configuration cache.
+    def modVersion = project.version.toString()
+    inputs.property "version", modVersion
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand "version": modVersion
     }
 }
 
