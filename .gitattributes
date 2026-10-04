@@ -1,0 +1,9 @@
+# Use LF line endings everywhere so builds and diffs look the same on every system.
+* text=auto eol=lf
+
+# Windows batch files must keep CRLF.
+*.bat text eol=crlf
+
+# Never touch binary files.
+*.jar binary
+*.png binary
