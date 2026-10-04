@@ -9,6 +9,6 @@ public final class KryptonServerInitializer implements DedicatedServerModInitial
 
     @Override
     public void onInitializeServer() {
-        LOGGER.info("Krypton is now accelerating your Minecraft server's networking stack \uD83D\uDE80");
+        LOGGER.info("Krypton is now accelerating your Minecraft server's networking stack");
     }
 }
