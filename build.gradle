@@ -1,6 +1,6 @@
 plugins {
-    id 'fabric-loom' version '1.10-SNAPSHOT'
-    id 'maven-publish'
+    id "fabric-loom" version "1.10-SNAPSHOT"
+    id "maven-publish"
 }
 
 version = project.mod_version
@@ -13,8 +13,8 @@ base {
 repositories {
     mavenCentral()
     maven {
-        name = 'PaperMC'
-        url = 'https://repo.papermc.io/repository/maven-public/'
+        name = "PaperMC"
+        url = "https://repo.papermc.io/repository/maven-public/"
     }
 }
 
@@ -23,29 +23,26 @@ dependencies {
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    implementation(include("com.velocitypowered:velocity-native:3.4.0-SNAPSHOT")) {
+    implementation("com.velocitypowered:velocity-native:3.4.0-SNAPSHOT") {
         transitive = false
     }
+    include("com.velocitypowered:velocity-native:3.4.0-SNAPSHOT")
 
-    testImplementation platform('org.junit:junit-bom:5.12.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-loom {
-    accessWidenerPath = file('src/main/resources/krypton.accesswidener')
+    testImplementation platform("org.junit:junit-bom:5.12.0")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 processResources {
-    inputs.property 'version', project.version
+    inputs.property "version", project.version
 
-    filesMatching('fabric.mod.json') {
-        expand 'version': inputs.properties.version
+    filesMatching("fabric.mod.json") {
+        expand "version": inputs.properties.version
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = 'UTF-8'
+    it.options.encoding = "UTF-8"
     it.options.release = 25
 }
 
@@ -57,14 +54,13 @@ java {
 
 test {
     useJUnitPlatform()
-    systemProperty 'io.netty.leakDetection.level', 'PARANOID'
-    systemProperty 'io.netty.leakDetection.targetRecords', '32'
+    systemProperty "io.netty.leakDetection.level", "PARANOID"
 }
 
 jar {
-    inputs.property 'archivesName', project.base.archivesName
+    inputs.property "archivesName", project.base.archivesName
 
-    from('LICENSE') {
+    from("LICENSE") {
         rename { "${it}_${inputs.properties.archivesName}" }
     }
 }
