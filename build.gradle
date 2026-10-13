@@ -1,12 +1,6 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.17.21'
+    id 'fabric-loom' version '1.10-SNAPSHOT'
     id 'maven-publish'
-}
-
-repositories {
-    maven {
-        url = "https://repo.papermc.io/repository/maven-public/"
-    }
 }
 
 version = project.mod_version
@@ -16,74 +10,61 @@ base {
     archivesName = project.archives_base_name
 }
 
-dependencies {
-    // The JUnit BOM keeps every JUnit artifact on the same version.
-    testImplementation platform('org.junit:junit-bom:6.1.3')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    implementation include("com.velocitypowered:velocity-native:3.4.0-SNAPSHOT")
+repositories {
+    mavenCentral()
+    maven {
+        name = 'PaperMC'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
 }
 
-test {
-    useJUnitPlatform()
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    // Show why a test failed directly in the build log (useful in GitHub Actions).
-    testLogging {
-        events 'failed', 'skipped'
-        exceptionFormat = 'full'
+    implementation(include("com.velocitypowered:velocity-native:3.4.0-SNAPSHOT")) {
+        transitive = false
     }
 
-    // Make Netty report any leaked reference-counted buffer while tests run.
-    systemProperty 'io.netty.leakDetection.level', 'paranoid'
+    testImplementation platform('org.junit:junit-bom:5.12.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/krypton.accesswidener')
 }
 
 processResources {
-    // Read the version now, while Gradle configures the build. The closure below runs later, and
-    // touching `project` inside it is not allowed with the configuration cache.
-    def modVersion = project.version.toString()
-    inputs.property "version", modVersion
+    inputs.property 'version', project.version
 
-    filesMatching("fabric.mod.json") {
-        expand "version": modVersion
+    filesMatching('fabric.mod.json') {
+        expand 'version': inputs.properties.version
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    // UTF-8 regardless of the system default, and compile against the Java 25 API.
-    options.encoding = 'UTF-8'
-    options.release = 25
-}
-
-// Identical inputs produce an identical jar (same file order, no timestamps).
-tasks.withType(AbstractArchiveTask).configureEach {
-    preserveFileTimestamps = false
-    reproducibleFileOrder = true
+    it.options.encoding = 'UTF-8'
+    it.options.release = 25
 }
 
 java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
     withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty 'io.netty.leakDetection.level', 'PARANOID'
+    systemProperty 'io.netty.leakDetection.targetRecords', '32'
 }
 
 jar {
-    from "LICENSE"
-}
+    inputs.property 'archivesName', project.base.archivesName
 
-// configure the maven publication
-publishing {
-    publications {
-        create("mavenJava", MavenPublication) {
-            from components.java
-        }
+    from('LICENSE') {
+        rename { "${it}_${inputs.properties.archivesName}" }
     }
-}
-
-
-loom {
-    accessWidenerPath = file("src/main/resources/krypton.accesswidener")
 }
