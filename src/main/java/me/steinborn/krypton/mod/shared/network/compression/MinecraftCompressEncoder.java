@@ -5,7 +5,7 @@ import com.velocitypowered.natives.util.MoreByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import net.minecraft.network.VarInt;
+import me.steinborn.krypton.mod.shared.network.util.VarIntUtil;
 
 public class MinecraftCompressEncoder extends MessageToByteEncoder<ByteBuf> {
 
@@ -22,10 +22,10 @@ public class MinecraftCompressEncoder extends MessageToByteEncoder<ByteBuf> {
         int uncompressed = msg.readableBytes();
         if (uncompressed < threshold) {
             // Under the threshold, there is nothing to do.
-            VarInt.write(out, 0);
+            VarIntUtil.writeVarInt(out, 0);
             out.writeBytes(msg);
         } else {
-            VarInt.write(out, uncompressed);
+            VarIntUtil.writeVarInt(out, uncompressed);
             ByteBuf compatibleIn = MoreByteBufUtils.ensureCompatible(ctx.alloc(), compressor, msg);
             try {
                 compressor.deflate(compatibleIn, out);
