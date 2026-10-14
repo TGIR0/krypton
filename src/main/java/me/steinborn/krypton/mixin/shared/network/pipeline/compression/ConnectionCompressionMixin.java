@@ -24,14 +24,15 @@ public class ConnectionCompressionMixin {
     @Shadow
     private Channel channel;
 
+    @Unique
     @Inject(method = "setupCompression", at = @At("HEAD"), cancellable = true)
     private void krypton$setupCompression(int compressionThreshold, boolean validate, CallbackInfo ci) {
         SocketTuning.applyLowLatency(this.channel);
         if (compressionThreshold < 0) {
-            if (krypton$isRemovableDecompressor(this.channel.pipeline().get("decompress"))) {
+            if (krypton$isKryptonOrVanillaDecompressor(this.channel.pipeline().get("decompress"))) {
                 this.channel.pipeline().remove("decompress");
             }
-            if (krypton$isRemovableCompressor(this.channel.pipeline().get("compress"))) {
+            if (krypton$isKryptonOrVanillaCompressor(this.channel.pipeline().get("compress"))) {
                 this.channel.pipeline().remove("compress");
             }
             this.channel.pipeline().fireUserEventTriggered(KryptonPipelineEvent.COMPRESSION_DISABLED);
@@ -65,12 +66,12 @@ public class ConnectionCompressionMixin {
     }
 
     @Unique
-    private static boolean krypton$isRemovableDecompressor(Object handler) {
+    private static boolean krypton$isKryptonOrVanillaDecompressor(Object handler) {
         return handler instanceof CompressionDecoder || handler instanceof MinecraftCompressDecoder;
     }
 
     @Unique
-    private static boolean krypton$isRemovableCompressor(Object handler) {
+    private static boolean krypton$isKryptonOrVanillaCompressor(Object handler) {
         return handler instanceof CompressionEncoder || handler instanceof MinecraftCompressEncoder;
     }
 }
