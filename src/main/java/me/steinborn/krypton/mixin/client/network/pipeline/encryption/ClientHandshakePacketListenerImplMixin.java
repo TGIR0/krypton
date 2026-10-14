@@ -10,6 +10,7 @@ import net.minecraft.network.Connection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 import javax.crypto.Cipher;
@@ -23,6 +24,7 @@ public class ClientHandshakePacketListenerImplMixin {
     @Final
     private Connection connection;
 
+    @Unique
     @WrapOperation(
             method = "handleHello",
             at = @At(
@@ -31,8 +33,9 @@ public class ClientHandshakePacketListenerImplMixin {
             )
     )
     private Cipher krypton$prepareVelocityCipher(int opMode, Key secretKey, Operation<Cipher> original) {
-        // Defer pipeline injection until Connection#setEncryptionKey runs in the PacketSendListener
-        // callback after the unencrypted ServerboundKeyPacket is sent.
+        // Store the secret key on the connection without allocating native cipher contexts yet.
+        // Native ciphers are initialized in Connection#setEncryptionKey after authentication
+        // succeeds and the unencrypted ServerboundKeyPacket has been sent.
         ((ClientConnectionEncryptionExtension) this.connection).prepareEncryption((SecretKey) secretKey);
         return null;
     }
