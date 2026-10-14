@@ -14,12 +14,15 @@
     "shared.network.microopt.VarIntMixin",
     "shared.network.pipeline.LegacyQueryHandlerMixin",
     "shared.network.pipeline.Varint21FrameDecoderMixin",
-    "shared.network.pipeline.compression.ConnectionMixin",
-    "shared.network.pipeline.encryption.ConnectionMixin",
+    "shared.network.pipeline.compression.ConnectionCompressionMixin",
+    "shared.network.pipeline.encryption.ConnectionEncryptionMixin",
     "shared.network.pipeline.encryption.ServerLoginPacketListenerImplMixin",
-    "shared.network.pipeline.prepender.ConnectionMixin"
+    "shared.network.pipeline.prepender.ConnectionPrependerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
+  },
+  "mixinextras": {
+    "minVersion": "0.5.0"
   }
 }
