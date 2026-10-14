@@ -2,6 +2,7 @@
 
 A [Fabric](https://fabricmc.net/) mod that optimizes the Minecraft networking stack and the entity tracker.
 It works on both the client and the dedicated server.
+
 This repository is a fork of [astei/krypton](https://github.com/astei/krypton) with extra hardening,
 small cleanups, and unit tests. Most of the credit for the mod itself goes to the original author
 (see [Credits](#credits)).
@@ -14,7 +15,7 @@ small cleanups, and unit tests. Most of the credit for the mod itself goes to th
 | Item | Version |
 |------|---------|
 | Minecraft | 26.3.x |
-| Fabric Loader | 0.18.4 or newer (tested with 0.19.5) |
+| Fabric Loader | 0.18.4 or newer |
 | JDK (only for building) | 25 |
 
 ## Installation
@@ -57,16 +58,13 @@ Every push is also built and tested automatically by GitHub Actions (see `.githu
 
 * **Decompression size limit is always enforced.** The claimed uncompressed size is checked against the active hard cap even when packet validation is disabled.
 * **Negative claimed sizes are rejected.** Malformed compression metadata cannot reach the native allocator.
-* **Dedicated native compressor per direction.** Inbound decompression and outbound compression each manage their own native compressor instance with full rollback cleanup on pipeline injection failure.
-* **Proper connection encryption state.** `Connection.isEncrypted()` accurately reflects active native encryption, and duplicate cipher initialization during login is eliminated.
-* **Strict 21-bit VarInt frame decoding.** Overlong VarInts in 3-byte small buffers are rejected consistently with the 4-byte fast path.
-* **Zero-allocation VarInt & single-pass short UTF-8 encoding.** Eliminates per-packet `FriendlyByteBuf` wrapper allocations and encodes short strings (`<= 42` chars) in a single pass.
+* **Safer compression handler setup.** When compression is turned off, only vanilla or Krypton compression handlers are removed. When it is turned on, Krypton reuses its own handlers if they already exist (only updating the threshold) and otherwise replaces whatever is in the `compress` and `decompress` slots.
 * **e4mc compatibility.** The Krypton login encryption mixin is skipped automatically when e4mc is loaded, to avoid a mixin conflict. In that case the game's normal (vanilla) encryption is used instead of Krypton's native encryption.
 * **Correct reference-count cleanup.** The inactive legacy query path releases reference-counted messages before cancelling the pipeline read.
 * **Low-latency sockets.** `TCP_NODELAY` is enforced on every TCP connection (normally already on; this is a safety net), avoiding stalls of roughly 40 ms caused by Nagle's algorithm.
 * **Frame size check.** Packets too large for the protocol's 3-byte length prefix now fail on the sending side with a clear error.
 * **Tunable compression level.** See `krypton.compression-level` below.
-* **Unit tests.** A test suite built on Netty's `EmbeddedChannel` covers the compression, encryption, and framing handlers: oversized, negative and corrupt packets, exact threshold and size-cap boundaries, full compress/decompress round trips, fragmented encrypted streams, and buffer leak checks (Netty's paranoid leak detector is enabled while tests run). VarInt length calculation is checked against the vanilla result for all 2^32 integers.
+* **Unit tests.** A test suite built on Netty's `EmbeddedChannel` covers the compression and encryption handlers: oversized, negative and corrupt packets, exact threshold and size-cap boundaries, full compress/decompress round trips, fragmented encrypted streams, and buffer leak checks (Netty's paranoid leak detector is enabled while tests run). VarInt length calculation is checked against the vanilla result for all 2^32 integers.
 * **Housekeeping.** Utility classes are `final` with private constructors and the Gradle wrapper is kept current with the fork.
 
 ## Advanced options
