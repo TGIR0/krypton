@@ -5,4 +5,6 @@ import java.security.GeneralSecurityException;
 
 public interface ClientConnectionEncryptionExtension {
     void setupEncryption(SecretKey key) throws GeneralSecurityException;
+
+    void prepareEncryption(SecretKey key);
 }
