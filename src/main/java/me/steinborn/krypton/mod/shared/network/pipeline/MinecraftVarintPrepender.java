@@ -7,7 +7,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import me.steinborn.krypton.mod.shared.network.util.PacketFraming;
-import net.minecraft.network.VarInt;
+import me.steinborn.krypton.mod.shared.network.util.VarIntUtil;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class MinecraftVarintPrepender extends MessageToMessageEncoder<ByteBuf> {
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         final int length = msg.readableBytes();
         PacketFraming.checkFrameLength(length);
-        final int varintLength = VarInt.getByteSize(length);
+        final int varintLength = VarIntUtil.getVarIntLength(length);
 
         // this isn't optimal (ideally, we would use the trick Velocity uses and combine the prepender and
         // compressor into one), but to maximize mod compatibility, we do this instead
@@ -28,7 +28,7 @@ public class MinecraftVarintPrepender extends MessageToMessageEncoder<ByteBuf> {
                 ? ctx.alloc().heapBuffer(varintLength)
                 : ctx.alloc().directBuffer(varintLength);
 
-        VarInt.write(lenBuf, length);
+        VarIntUtil.writeVarInt(lenBuf, length);
         out.add(lenBuf);
         out.add(msg.retain());
     }
