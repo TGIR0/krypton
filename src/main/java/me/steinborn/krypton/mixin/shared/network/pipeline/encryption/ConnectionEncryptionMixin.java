@@ -20,7 +20,7 @@ import javax.crypto.SecretKey;
 import java.security.GeneralSecurityException;
 
 @Mixin(Connection.class)
-public class ConnectionMixin implements ClientConnectionEncryptionExtension {
+public class ConnectionEncryptionMixin implements ClientConnectionEncryptionExtension {
     @Shadow
     private Channel channel;
 
@@ -28,19 +28,19 @@ public class ConnectionMixin implements ClientConnectionEncryptionExtension {
     private boolean encrypted;
 
     @Unique
-    private boolean kryptonEncryptionEnabled = false;
+    private boolean krypton$encryptionEnabled = false;
 
     @Unique
-    private SecretKey kryptonPendingSecretKey;
+    private SecretKey krypton$pendingSecretKey;
 
     @Override
     public void prepareEncryption(SecretKey key) {
-        this.kryptonPendingSecretKey = key;
+        this.krypton$pendingSecretKey = key;
     }
 
     @Override
     public void setupEncryption(SecretKey key) throws GeneralSecurityException {
-        if (this.kryptonEncryptionEnabled) {
+        if (this.krypton$encryptionEnabled) {
             return;
         }
 
@@ -51,15 +51,15 @@ public class ConnectionMixin implements ClientConnectionEncryptionExtension {
         this.channel.pipeline().addBefore("prepender", "encrypt", new MinecraftCipherEncoder(encryption));
         this.channel.pipeline().fireUserEventTriggered(KryptonPipelineEvent.ENCRYPTION_ENABLED);
 
-        this.kryptonEncryptionEnabled = true;
+        this.krypton$encryptionEnabled = true;
         this.encrypted = true;
     }
 
     @Inject(method = "setEncryptionKey", at = @At("HEAD"), cancellable = true)
-    private void onSetEncryptionKey(Cipher decryptCipher, Cipher encryptCipher, CallbackInfo ci) {
-        SecretKey key = this.kryptonPendingSecretKey;
+    private void krypton$onSetEncryptionKey(Cipher decryptCipher, Cipher encryptCipher, CallbackInfo ci) {
+        SecretKey key = this.krypton$pendingSecretKey;
         if (key != null) {
-            this.kryptonPendingSecretKey = null;
+            this.krypton$pendingSecretKey = null;
             try {
                 this.setupEncryption(key);
             } catch (GeneralSecurityException e) {
