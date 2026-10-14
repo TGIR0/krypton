@@ -4,9 +4,7 @@
   "package": "me.steinborn.krypton.mixin",
   "compatibilityLevel": "JAVA_25",
   "plugin": "me.steinborn.krypton.mod.shared.KryptonMixinPlugin",
-  "client": [
-    "client.network.pipeline.encryption.ClientHandshakePacketListenerImplMixin"
-  ],
+  "client": [],
   "mixins": [
     "shared.debugaid.ResourceLeakDetectorDisableConditionalMixin",
     "shared.network.microopt.ServerEntityMixin",
