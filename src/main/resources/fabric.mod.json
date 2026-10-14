@@ -36,6 +36,7 @@
   "accessWidener": "krypton.accesswidener",
   "depends": {
     "fabricloader": ">=0.18.4",
-    "minecraft": "~26.3"
+    "minecraft": "~26.3",
+    "java": ">=25"
   }
 }
