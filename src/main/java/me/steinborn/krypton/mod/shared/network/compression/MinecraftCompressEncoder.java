@@ -41,11 +41,11 @@ public class MinecraftCompressEncoder extends MessageToByteEncoder<ByteBuf> {
         // We allocate bytes to be compressed plus 1 byte. This covers two cases:
         //
         // - Compression
-        //     According to https://github.com/ebiggers/libdeflate/blob/master/libdeflate.h#L103,
-        //     if the data compresses well (and we do not have some pathological case) then the maximum
-        //     size the compressed size will ever be is the input size minus one.
+        //    According to https://github.com/ebiggers/libdeflate/blob/master/libdeflate.h#L103,
+        //    if the data compresses well (and we do not have some pathological case) then the maximum
+        //    size the compressed size will ever be is the input size minus one.
         // - Uncompressed
-        //     This is fairly obvious - we will then have one more than the uncompressed size.
+        //    This is fairly obvious - we will then have one more than the uncompressed size.
         int initialBufferSize = msg.readableBytes() + 1;
         return MoreByteBufUtils.preferredBuffer(ctx.alloc(), compressor, initialBufferSize);
     }
