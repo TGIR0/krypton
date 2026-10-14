@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 public class VarIntMixin {
     /**
      * @author Andrew Steinborn
-     * @reason Use lookup-table VarInt length calculation
+     * @reason optimized version
      */
     @Overwrite
     public static int getByteSize(int v) {
@@ -19,7 +19,7 @@ public class VarIntMixin {
 
     /**
      * @author Andrew Steinborn
-     * @reason Use branch-peeled multi-byte VarInt writer
+     * @reason optimized version
      */
     @Overwrite
     public static ByteBuf write(ByteBuf buf, int value) {
