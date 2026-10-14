@@ -13,5 +13,6 @@ public final class KryptonClientInitializer implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         LOGGER.info("Krypton is now accelerating your Minecraft client's networking stack");
+        LOGGER.info("Note that Krypton is most effective on servers, not the client.");
     }
 }
