@@ -2,6 +2,7 @@ package me.steinborn.krypton.mod.shared.network.util;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.DecoderException;
 import me.steinborn.krypton.mod.shared.network.testsupport.VarInts;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class VarIntUtilTest {
 
@@ -52,26 +54,47 @@ class VarIntUtilTest {
     }
 
     @Test
-    void matchesTheRealEncodedLength() {
-        // Compare against the bytes an actual VarInt encoder writes, not just another formula.
+    void matchesTheRealEncodedLengthAndRoundTrips() {
+        // Compare against the bytes an actual VarInt encoder writes, and verify readVarInt/writeVarInt.
         Random random = new Random(42);
         int[] fixed = {0, 1, 127, 128, 16383, 16384, 2097151, 2097152, 268435455, 268435456,
                 Integer.MAX_VALUE, -1, Integer.MIN_VALUE};
         for (int value : fixed) {
-            assertEncodedLengthMatches(value);
+            assertEncodedLengthAndRoundTripMatches(value);
         }
         for (int i = 0; i < 100_000; i++) {
-            assertEncodedLengthMatches(random.nextInt());
+            assertEncodedLengthAndRoundTripMatches(random.nextInt());
         }
     }
 
-    private static void assertEncodedLengthMatches(int value) {
-        ByteBuf buf = Unpooled.buffer(5);
-        VarInts.write(buf, value);
-        int written = buf.readableBytes();
-        buf.release();
-        assertEquals(written, VarIntUtil.getVarIntLength(value), "value " + value);
-        assertEquals(written, VarInts.encodedLength(value), "helper, value " + value);
+    private static void assertEncodedLengthAndRoundTripMatches(int value) {
+        ByteBuf referenceBuf = Unpooled.buffer(5);
+        ByteBuf fastBuf = Unpooled.buffer(5);
+        try {
+            VarInts.write(referenceBuf, value);
+            VarIntUtil.writeVarInt(fastBuf, value);
+
+            int written = referenceBuf.readableBytes();
+            assertEquals(written, VarIntUtil.getVarIntLength(value), "length for value " + value);
+            assertEquals(written, VarInts.encodedLength(value), "helper length for value " + value);
+            assertEquals(referenceBuf, fastBuf, "encoded bytes mismatch for value " + value);
+            assertEquals(value, VarIntUtil.readVarInt(fastBuf), "decoded value mismatch for " + value);
+        } finally {
+            referenceBuf.release();
+            fastBuf.release();
+        }
+    }
+
+    @Test
+    void readVarIntRejectsOverlongSixByteSequence() {
+        ByteBuf overlong = Unpooled.wrappedBuffer(new byte[]{
+                (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80, (byte) 0x80, 0x01
+        });
+        try {
+            assertThrows(DecoderException.class, () -> VarIntUtil.readVarInt(overlong));
+        } finally {
+            overlong.release();
+        }
     }
 
     @Test
