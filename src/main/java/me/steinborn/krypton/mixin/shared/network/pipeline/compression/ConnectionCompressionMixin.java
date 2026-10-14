@@ -14,40 +14,41 @@ import net.minecraft.network.CompressionEncoder;
 import net.minecraft.network.Connection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Connection.class)
-public class ConnectionMixin {
+public class ConnectionCompressionMixin {
     @Shadow
     private Channel channel;
 
     @Inject(method = "setupCompression", at = @At("HEAD"), cancellable = true)
-    public void setupCompression(int compressionThreshold, boolean validate, CallbackInfo ci) {
+    private void krypton$setupCompression(int compressionThreshold, boolean validate, CallbackInfo ci) {
         SocketTuning.applyLowLatency(this.channel);
         if (compressionThreshold < 0) {
-            if (isKryptonOrVanillaDecompressor(this.channel.pipeline().get("decompress"))) {
+            if (krypton$isRemovableDecompressor(this.channel.pipeline().get("decompress"))) {
                 this.channel.pipeline().remove("decompress");
             }
-            if (isKryptonOrVanillaCompressor(this.channel.pipeline().get("compress"))) {
+            if (krypton$isRemovableCompressor(this.channel.pipeline().get("compress"))) {
                 this.channel.pipeline().remove("compress");
             }
             this.channel.pipeline().fireUserEventTriggered(KryptonPipelineEvent.COMPRESSION_DISABLED);
         } else {
-            ChannelHandler existingDecoder = channel.pipeline().get("decompress");
-            ChannelHandler existingEncoder = channel.pipeline().get("compress");
-            if (existingDecoder instanceof MinecraftCompressDecoder
-                    && existingEncoder instanceof MinecraftCompressEncoder) {
-                ((MinecraftCompressDecoder) existingDecoder).setThreshold(compressionThreshold);
-                ((MinecraftCompressEncoder) existingEncoder).setThreshold(compressionThreshold);
+            ChannelHandler existingDecoder = this.channel.pipeline().get("decompress");
+            ChannelHandler existingEncoder = this.channel.pipeline().get("compress");
+            if (existingDecoder instanceof MinecraftCompressDecoder kryptonDecoder
+                    && existingEncoder instanceof MinecraftCompressEncoder kryptonEncoder) {
+                kryptonDecoder.setThreshold(compressionThreshold);
+                kryptonEncoder.setThreshold(compressionThreshold);
                 this.channel.pipeline().fireUserEventTriggered(KryptonPipelineEvent.COMPRESSION_THRESHOLD_UPDATED);
             } else {
                 if (existingDecoder != null) {
-                    channel.pipeline().remove(existingDecoder);
+                    this.channel.pipeline().remove(existingDecoder);
                 }
                 if (existingEncoder != null) {
-                    channel.pipeline().remove(existingEncoder);
+                    this.channel.pipeline().remove(existingEncoder);
                 }
                 int level = CompressionLevel.get();
                 VelocityCompressor decoderCompressor = Natives.compress.get().create(level);
@@ -55,19 +56,21 @@ public class ConnectionMixin {
                 MinecraftCompressDecoder decoder = new MinecraftCompressDecoder(compressionThreshold, validate, decoderCompressor);
                 MinecraftCompressEncoder encoder = new MinecraftCompressEncoder(compressionThreshold, encoderCompressor);
 
-                channel.pipeline().addBefore("decoder", "decompress", decoder);
-                channel.pipeline().addBefore("encoder", "compress", encoder);
+                this.channel.pipeline().addBefore("decoder", "decompress", decoder);
+                this.channel.pipeline().addBefore("encoder", "compress", encoder);
                 this.channel.pipeline().fireUserEventTriggered(KryptonPipelineEvent.COMPRESSION_ENABLED);
             }
         }
         ci.cancel();
     }
 
-    private static boolean isKryptonOrVanillaDecompressor(Object o) {
-        return o instanceof CompressionDecoder || o instanceof MinecraftCompressDecoder;
+    @Unique
+    private static boolean krypton$isRemovableDecompressor(Object handler) {
+        return handler instanceof CompressionDecoder || handler instanceof MinecraftCompressDecoder;
     }
 
-    private static boolean isKryptonOrVanillaCompressor(Object o) {
-        return o instanceof CompressionEncoder || o instanceof MinecraftCompressEncoder;
+    @Unique
+    private static boolean krypton$isRemovableCompressor(Object handler) {
+        return handler instanceof CompressionEncoder || handler instanceof MinecraftCompressEncoder;
     }
 }
