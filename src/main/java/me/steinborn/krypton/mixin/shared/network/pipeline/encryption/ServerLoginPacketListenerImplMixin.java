@@ -8,6 +8,7 @@ import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 import javax.crypto.Cipher;
@@ -21,6 +22,7 @@ public class ServerLoginPacketListenerImplMixin {
     @Final
     Connection connection;
 
+    @Unique
     @WrapOperation(
             method = "handleKey",
             at = @At(
@@ -29,11 +31,14 @@ public class ServerLoginPacketListenerImplMixin {
             )
     )
     private Cipher krypton$initializeVelocityCipher(int opMode, Key secretKey, Operation<Cipher> original) throws GeneralSecurityException {
-        // Initialize Krypton's native cipher on the connection and skip JCE Cipher allocation.
+        // Hijack this portion of the cipher initialization and set up our own encryption handler.
         ((ClientConnectionEncryptionExtension) this.connection).setupEncryption((SecretKey) secretKey);
+
+        // Turn the operation into a no-op.
         return null;
     }
 
+    @Unique
     @WrapOperation(
             method = "handleKey",
             at = @At(
@@ -41,7 +46,7 @@ public class ServerLoginPacketListenerImplMixin {
                     target = "Lnet/minecraft/network/Connection;setEncryptionKey(Ljavax/crypto/Cipher;Ljavax/crypto/Cipher;)V"
             )
     )
-    private void krypton$skipVanillaEncryptionPipelineInjection(Connection connection, Cipher decryptCipher, Cipher encryptCipher, Operation<Void> original) {
+    private void krypton$ignoreMinecraftEncryptionPipelineInjection(Connection connection, Cipher decryptCipher, Cipher encryptCipher, Operation<Void> original) {
         if (decryptCipher != null && encryptCipher != null) {
             original.call(connection, decryptCipher, encryptCipher);
         }
