@@ -2,11 +2,11 @@ package me.steinborn.krypton.mod.shared;
 
 import com.velocitypowered.natives.util.Natives;
 import net.fabricmc.api.ModInitializer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class KryptonSharedInitializer implements ModInitializer {
-    private static final Logger LOGGER = LogManager.getLogger(KryptonSharedInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KryptonSharedInitializer.class);
 
     static {
         // By default, Netty allocates 16MiB arenas for the PooledByteBufAllocator. This is too much
