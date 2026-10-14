@@ -8,7 +8,8 @@ import io.netty.handler.codec.DecoderException;
  * <p>
  * A VarInt stores 7 bits per byte, so the byte count only depends on how many bits the number
  * uses. {@link Integer#numberOfLeadingZeros(int)} gives that, and a small lookup table, indexed by
- * the number of leading zero bits (0 to 32), turns it into a byte count.
+ * the number of leading zero bits (0 to 32), turns it into a byte count. A micro-benchmark showed
+ * this is faster than computing the length with arithmetic.
  */
 public final class VarIntUtil {
     private static final int[] VARINT_EXACT_BYTE_LENGTHS = new int[33];
@@ -54,7 +55,7 @@ public final class VarIntUtil {
 
     /**
      * Writes {@code value} as a VarInt into {@code buf}, peeling the common 1-byte and 2-byte
-     * cases to assist JIT inlining.
+     * cases to improve JIT inlining.
      */
     public static ByteBuf writeVarInt(ByteBuf buf, int value) {
         if ((value & (0xFFFFFFFF << 7)) == 0) {
