@@ -55,19 +55,19 @@ class VarIntUtilTest {
 
     @Test
     void matchesTheRealEncodedLengthAndRoundTrips() {
-        // Compare against the bytes an actual VarInt encoder writes, and verify readVarInt/writeVarInt.
+        // Compare against the bytes an actual VarInt encoder writes, not just another formula.
         Random random = new Random(42);
         int[] fixed = {0, 1, 127, 128, 16383, 16384, 2097151, 2097152, 268435455, 268435456,
                 Integer.MAX_VALUE, -1, Integer.MIN_VALUE};
         for (int value : fixed) {
-            assertEncodedLengthAndRoundTripMatches(value);
+            assertEncodedLengthMatches(value);
         }
         for (int i = 0; i < 100_000; i++) {
-            assertEncodedLengthAndRoundTripMatches(random.nextInt());
+            assertEncodedLengthMatches(random.nextInt());
         }
     }
 
-    private static void assertEncodedLengthAndRoundTripMatches(int value) {
+    private static void assertEncodedLengthMatches(int value) {
         ByteBuf referenceBuf = Unpooled.buffer(5);
         ByteBuf fastBuf = Unpooled.buffer(5);
         try {
@@ -75,10 +75,10 @@ class VarIntUtilTest {
             VarIntUtil.writeVarInt(fastBuf, value);
 
             int written = referenceBuf.readableBytes();
-            assertEquals(written, VarIntUtil.getVarIntLength(value), "length for value " + value);
-            assertEquals(written, VarInts.encodedLength(value), "helper length for value " + value);
-            assertEquals(referenceBuf, fastBuf, "encoded bytes mismatch for value " + value);
-            assertEquals(value, VarIntUtil.readVarInt(fastBuf), "decoded value mismatch for " + value);
+            assertEquals(written, VarIntUtil.getVarIntLength(value), "value " + value);
+            assertEquals(written, VarInts.encodedLength(value), "helper, value " + value);
+            assertEquals(referenceBuf, fastBuf, "encoded bytes for value " + value);
+            assertEquals(value, VarIntUtil.readVarInt(fastBuf), "decoded value for " + value);
         } finally {
             referenceBuf.release();
             fastBuf.release();
