@@ -5,7 +5,7 @@ import com.velocitypowered.natives.util.MoreByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.VarInt;
 
 public class MinecraftCompressEncoder extends MessageToByteEncoder<ByteBuf> {
 
@@ -19,14 +19,13 @@ public class MinecraftCompressEncoder extends MessageToByteEncoder<ByteBuf> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) throws Exception {
-        FriendlyByteBuf wrappedBuf = new FriendlyByteBuf(out);
         int uncompressed = msg.readableBytes();
         if (uncompressed < threshold) {
             // Under the threshold, there is nothing to do.
-            wrappedBuf.writeVarInt(0);
+            VarInt.write(out, 0);
             out.writeBytes(msg);
         } else {
-            wrappedBuf.writeVarInt(uncompressed);
+            VarInt.write(out, uncompressed);
             ByteBuf compatibleIn = MoreByteBufUtils.ensureCompatible(ctx.alloc(), compressor, msg);
             try {
                 compressor.deflate(compatibleIn, out);
@@ -42,11 +41,11 @@ public class MinecraftCompressEncoder extends MessageToByteEncoder<ByteBuf> {
         // We allocate bytes to be compressed plus 1 byte. This covers two cases:
         //
         // - Compression
-        //    According to https://github.com/ebiggers/libdeflate/blob/master/libdeflate.h#L103,
-        //    if the data compresses well (and we do not have some pathological case) then the maximum
-        //    size the compressed size will ever be is the input size minus one.
+        //     According to https://github.com/ebiggers/libdeflate/blob/master/libdeflate.h#L103,
+        //     if the data compresses well (and we do not have some pathological case) then the maximum
+        //     size the compressed size will ever be is the input size minus one.
         // - Uncompressed
-        //    This is fairly obvious - we will then have one more than the uncompressed size.
+        //     This is fairly obvious - we will then have one more than the uncompressed size.
         int initialBufferSize = msg.readableBytes() + 1;
         return MoreByteBufUtils.preferredBuffer(ctx.alloc(), compressor, initialBufferSize);
     }
