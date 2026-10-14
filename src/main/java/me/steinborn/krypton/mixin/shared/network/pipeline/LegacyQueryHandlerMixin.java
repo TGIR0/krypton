@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LegacyQueryHandler.class)
 public abstract class LegacyQueryHandlerMixin {
     @Inject(method = "channelRead", at = @At(value = "HEAD"), cancellable = true)
-    public void channelRead(ChannelHandlerContext ctx, Object msg, CallbackInfo ci) {
+    private void krypton$releaseOnInactiveChannelRead(ChannelHandlerContext ctx, Object msg, CallbackInfo ci) {
         if (!ctx.channel().isActive()) {
             ReferenceCountUtil.release(msg);
             ci.cancel();
