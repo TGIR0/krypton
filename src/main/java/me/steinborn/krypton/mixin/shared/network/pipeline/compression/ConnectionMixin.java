@@ -49,9 +49,11 @@ public class ConnectionMixin {
                 if (existingEncoder != null) {
                     channel.pipeline().remove(existingEncoder);
                 }
-                VelocityCompressor compressor = Natives.compress.get().create(CompressionLevel.get());
-                MinecraftCompressEncoder encoder = new MinecraftCompressEncoder(compressionThreshold, compressor);
-                MinecraftCompressDecoder decoder = new MinecraftCompressDecoder(compressionThreshold, validate, compressor);
+                int level = CompressionLevel.get();
+                VelocityCompressor decoderCompressor = Natives.compress.get().create(level);
+                VelocityCompressor encoderCompressor = Natives.compress.get().create(level);
+                MinecraftCompressDecoder decoder = new MinecraftCompressDecoder(compressionThreshold, validate, decoderCompressor);
+                MinecraftCompressEncoder encoder = new MinecraftCompressEncoder(compressionThreshold, encoderCompressor);
 
                 channel.pipeline().addBefore("decoder", "decompress", decoder);
                 channel.pipeline().addBefore("encoder", "compress", encoder);
