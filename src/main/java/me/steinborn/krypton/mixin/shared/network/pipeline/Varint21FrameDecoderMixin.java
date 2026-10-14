@@ -129,6 +129,6 @@ public class Varint21FrameDecoderMixin {
         if ((tmp = buffer.readByte()) >= 0) {
             return result | tmp << 14;
         }
-        return result | (tmp & 0x7F) << 14;
+        throw VARINT_BIG_CACHED;
     }
 }
